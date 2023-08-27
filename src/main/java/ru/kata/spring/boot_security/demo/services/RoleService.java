@@ -8,4 +8,6 @@ import java.util.List;
 public interface RoleService {
 
     List<Role> getRolesList();
+
+    public boolean isRoleInList(Role roleToCheck, List<Role> roleList);
 }

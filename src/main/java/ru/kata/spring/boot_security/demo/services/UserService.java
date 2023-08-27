@@ -19,4 +19,6 @@ public interface UserService {
 
     void editUser(Long id, User updatedUser);
 
+    public User settingRoles(User user);
+
 }

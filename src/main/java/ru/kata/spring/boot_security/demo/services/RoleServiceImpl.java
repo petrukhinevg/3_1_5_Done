@@ -28,4 +28,14 @@ public class RoleServiceImpl implements RoleService{
     public List<Role> getRolesList() {
         return roleDao.findAll();
     }
+
+    @Override
+    public boolean isRoleInList(Role roleToCheck, List<Role> roleList) {
+        for (Role role : roleList) {
+            if (role.getRoleName().equals(roleToCheck.getRoleName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

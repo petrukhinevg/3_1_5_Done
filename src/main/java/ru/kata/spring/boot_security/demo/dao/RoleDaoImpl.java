@@ -22,6 +22,24 @@ public class RoleDaoImpl implements RoleDao{
     @Override
     @Transactional
     public void save(Role role) {
-        entityManager.persist(role);
+        // Проверяем наличие роли с таким же именем
+        Role existingRole = entityManager
+                .createQuery("SELECT r FROM Role r WHERE r.roleName = :name", Role.class)
+                .setParameter("name", role.getRoleName())
+                .setMaxResults(1)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        if (existingRole == null) {
+            // Роли с таким именем еще нет, добавляем новую
+            entityManager.persist(role);
+        }
+    }
+
+    @Override
+    public Role findById(Long id) {
+        return null;
     }
 }
