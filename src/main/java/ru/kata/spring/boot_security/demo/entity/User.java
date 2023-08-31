@@ -37,6 +37,9 @@ public class User implements UserDetails {
     @NotEmpty(message = "Specify role")
     private List<Role> roles;
 
+    public User(String username, String password, Collection<? extends GrantedAuthority> mapRolesToAuthorities) {
+    }
+
     public List<Role> getRoles() {
         return roles;
     }

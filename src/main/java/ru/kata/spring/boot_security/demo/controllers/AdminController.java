@@ -18,9 +18,6 @@ import java.security.Principal;
 @RequestMapping("/admin")
 public class AdminController {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     private final UserService userService;
     private final RoleService roleService;
 
@@ -30,7 +27,7 @@ public class AdminController {
     }
 
     @GetMapping("/adminpage")
-    public String adminPage() {
+    public String getAdminPage() {
         return "/adminpage";
     }
 
@@ -47,13 +44,13 @@ public class AdminController {
     }
 
     @GetMapping("/user/{id}")
-    public String userPage(Model model, @PathVariable("id") Long id) {
+    public String getUserPage(Model model, @PathVariable("id") Long id) {
         model.addAttribute("user", userService.getUserById(id));
         return "/user";
     }
 
     @GetMapping("/new")
-    public String addUser(Model model, Model role) {
+    public String createUser(Model model, Model role) {
         role.addAttribute("roles", roleService.getRolesList());
         model.addAttribute("user", new User());
         return "/admin/usersinfo";
@@ -61,7 +58,7 @@ public class AdminController {
 
 
     @PostMapping("/create")
-    public String add(@ModelAttribute("user") User user){
+    public String addUser(@ModelAttribute("user") User user){
         userService.addUser(user);
         return "redirect:/admin/usersinfo";
     }

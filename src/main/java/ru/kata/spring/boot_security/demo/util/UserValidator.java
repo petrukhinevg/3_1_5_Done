@@ -5,17 +5,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import ru.kata.spring.boot_security.demo.dao.UserDao;
+import ru.kata.spring.boot_security.demo.dao.UserDaoImpl;
 import ru.kata.spring.boot_security.demo.entity.User;
-import ru.kata.spring.boot_security.demo.services.UserDetailsServiceImpl;
 
 @Component
 public class UserValidator implements Validator {
 
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final UserDao userDao;
 
     @Autowired
-    public UserValidator(UserDetailsServiceImpl userDetailsServiceImpl) {
-        this.userDetailsServiceImpl = userDetailsServiceImpl;
+    public UserValidator(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     @Override
@@ -28,7 +29,7 @@ public class UserValidator implements Validator {
         User user = (User) o;
 
         try {
-            userDetailsServiceImpl.loadUserByUsername(user.getUsername());
+            userDao.findByUsername(user.getUsername());
         } catch (UsernameNotFoundException ignored) {
             return; // все ок, пользователь не найден
         }

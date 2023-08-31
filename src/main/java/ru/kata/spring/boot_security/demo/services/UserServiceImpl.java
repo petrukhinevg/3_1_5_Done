@@ -16,13 +16,11 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
-    private final RoleDao roleDao;
     private final RoleService roleService;
     private final PasswordEncoder encoder;
 
     public UserServiceImpl(UserDaoImpl userDao, RoleDao roleDao, RoleService roleService, PasswordEncoder encoder) {
         this.userDao = userDao;
-        this.roleDao = roleDao;
         this.roleService = roleService;
         this.encoder = encoder;
     }
