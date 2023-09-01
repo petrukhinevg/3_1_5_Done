@@ -29,12 +29,12 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginPage() {
+    public String getLoginPage() {
         return "/login";
     }
 
     @GetMapping("/registration")
-    public String userRegistrationPage(@ModelAttribute("user") User user, Model model) {
+    public String getUserRegistrationPage(@ModelAttribute("user") User user, Model model) {
         model.addAttribute("rolesList", roleService.getRolesList());
         return "registration";
     }

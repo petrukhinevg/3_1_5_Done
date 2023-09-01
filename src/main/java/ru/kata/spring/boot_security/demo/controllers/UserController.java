@@ -21,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping
-    public String userPage(Model model, Principal principal) {
+    public String getUserPage(Model model, Principal principal) {
         model.addAttribute("user", userService.getUserByUsername(principal.getName()));
         model.addAttribute("userRoles", userService.getUserByUsername(principal.getName()).getAuthorities());
         return "user";
