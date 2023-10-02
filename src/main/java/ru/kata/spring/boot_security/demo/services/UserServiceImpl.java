@@ -1,85 +1,87 @@
 package ru.kata.spring.boot_security.demo.services;
 
+
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.RoleDao;
-import ru.kata.spring.boot_security.demo.dao.UserDao;
-import ru.kata.spring.boot_security.demo.dao.UserDaoImpl;
-import ru.kata.spring.boot_security.demo.entity.Role;
+import ru.kata.spring.boot_security.demo.dto.UserDto;
 import ru.kata.spring.boot_security.demo.entity.User;
+import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService {
-    private final UserDao userDao;
-    private final RoleService roleService;
-    private final PasswordEncoder encoder;
+public class UserServiceImpl implements ru.kata.spring.boot_security.demo.service.UserService, UserDetailsService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserDaoImpl userDao, RoleDao roleDao, RoleService roleService, PasswordEncoder encoder) {
-        this.userDao = userDao;
-        this.roleService = roleService;
-        this.encoder = encoder;
+    public UserServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Override
-    public List<User> showAllUsers() {
-        return userDao.findAll();
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> user = findByUsername(username);
+
+        if (user.isEmpty()) {
+            throw new UsernameNotFoundException(String.format("User" + username + "not found"));
+        }
+        return user.get();
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void addUser(User user) {
-        user.setPassword(encoder.encode(user.getPassword()));
-        userDao.save(settingRoles(user));
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     @Override
     public User getUserById(Long id) {
-        return userDao.findById(id);
+        return userRepository.getById(id);
+    }
+
+
+    @Override
+    @Transactional
+    public void addUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
     }
 
     @Override
-    public User getUserByUsername(String username) {
-        return userDao.findByUsername(username);
+    @Transactional
+    public void removeUser(Long id) {
+        userRepository.deleteById(id);
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteUser(Long id) {
-        userDao.deleteById(id);
-    }
+    @Transactional
+    public void updateUser(User user) {
+        Optional<User> userFromDB = userRepository.findById(user.getId());
+        String newPassword = user.getPassword();
+        String currentPassword = userFromDB.get().getPassword();
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void editUser(Long id, User updatedUser) {
-        User user = userDao.findById(id);
-        user.setId(updatedUser.getId());
-        user.setUsername(updatedUser.getUsername());
-        user.setEmail(updatedUser.getEmail());
-        user.setRoles(updatedUser.getRoles());
-        if (!user.getPassword().equals(updatedUser.getPassword())) {
-            user.setPassword(encoder.encode(updatedUser.getPassword()));
-
-            userDao.save(settingRoles(user));
+        if (!currentPassword.equals(newPassword)) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+
+        userRepository.save(user);
     }
 
-    public User settingRoles(User user) {
-        var roles = user.getRoles();
-        var roleList = roleService.getRolesList();
-        var list = new ArrayList<Role>();
-        for (Role role : roleList) {
-            for (Role userRole : roles) {
-                if (role.getRoleName().equals(userRole.getRoleName())) {
-                    list.add(role);
-                }
-            }
-        }
-        user.setRoles(list);
-        return user;
+    @Override
+    @Transactional
+    public User convertToUser(UserDto userDto) {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(userDto, User.class);
     }
 }

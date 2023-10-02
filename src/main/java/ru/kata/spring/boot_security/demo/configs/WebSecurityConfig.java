@@ -1,59 +1,81 @@
 package ru.kata.spring.boot_security.demo.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.kata.spring.boot_security.demo.dao.UserDao;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
+import ru.kata.spring.boot_security.demo.service.UserService;
+
+import java.util.Collections;
+
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final UserDetailsService userDetailsService;
-
     private final SuccessUserHandler successUserHandler;
+    private final UserService userService;
 
-    public WebSecurityConfig(UserDao userDao, UserDetailsService userDetailsService, SuccessUserHandler successUserHandler) {
-        this.userDetailsService = userDetailsService;
+    public WebSecurityConfig(SuccessUserHandler successUserHandler, UserService userService) {
+
         this.successUserHandler = successUserHandler;
+        this.userService = userService;
+    }
+
+    @Bean
+    GrantedAuthorityDefaults grantedAuthorityDefaults() {
+        return new GrantedAuthorityDefaults("");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .csrf()
+                .disable()
                 .authorizeRequests()
-                .antMatchers("/user").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/", "/index", "/registration/**", "/error").permitAll()
+                .antMatchers("/user").hasRole("USER")
+                .antMatchers("/index", "/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                .loginProcessingUrl("/process_login")
                 .successHandler(successUserHandler)
+                .loginPage("/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
                 .permitAll()
                 .and()
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login")
+                .logout().logoutSuccessUrl("/login")
                 .permitAll();
     }
 
-    // аутентификация
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(getPasswordEncoder());
-        authenticationProvider.setUserDetailsService(userDetailsService);
-        return authenticationProvider;
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public PasswordEncoder getPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider();
+        daoProvider.setPasswordEncoder(passwordEncoder());
+        daoProvider.setUserDetailsService((UserDetailsService) userService);
+        return daoProvider;
+    }
+    @Bean
+    public FilterRegistrationBean<HiddenHttpMethodFilter> hiddenHttpMethodFilter() {
+        FilterRegistrationBean<HiddenHttpMethodFilter> filterRegistrationBean =
+                new FilterRegistrationBean<>(new HiddenHttpMethodFilter());
+        filterRegistrationBean.setUrlPatterns(Collections.singletonList("/*"));
+        return filterRegistrationBean;
     }
 }

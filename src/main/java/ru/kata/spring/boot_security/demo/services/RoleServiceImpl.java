@@ -2,40 +2,33 @@ package ru.kata.spring.boot_security.demo.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.RoleDao;
 import ru.kata.spring.boot_security.demo.entity.Role;
+import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Service
-public class RoleServiceImpl implements RoleService{
+public class RoleServiceImpl implements ru.kata.spring.boot_security.demo.service.RoleService {
+    private final RoleRepository roleRepository;
 
-    private final RoleDao roleDao;
-
-    public RoleServiceImpl(RoleDao roleDao) {
-        this.roleDao = roleDao;
-    }
-
-    @PostConstruct
-    @Transactional(rollbackFor=Exception.class)
-    public void init() {
-        roleDao.save(new Role("ROLE_USER"));
-        roleDao.save(new Role("ROLE_ADMIN"));
+    public RoleServiceImpl(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
     }
 
     @Override
-    public List<Role> getRolesList() {
-        return roleDao.findAll();
+    public List<Role> getAllRoles() {
+        return roleRepository.findAll();
     }
 
     @Override
-    public boolean isRoleInList(Role roleToCheck, List<Role> roleList) {
-        for (Role role : roleList) {
-            if (role.getRoleName().equals(roleToCheck.getRoleName())) {
-                return true;
-            }
-        }
-        return false;
+    @Transactional
+    public void deleteRoleById(Long id) {
+        roleRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void addRole(Role role) {
+        roleRepository.save(role);
     }
 }

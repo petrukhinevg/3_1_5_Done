@@ -1,13 +1,15 @@
-package ru.kata.spring.boot_security.demo.services;
-
+package ru.kata.spring.boot_security.demo.service;
 
 import ru.kata.spring.boot_security.demo.entity.Role;
 
 import java.util.List;
 
 public interface RoleService {
+    List<Role> getAllRoles();
 
-    List<Role> getRolesList();
+    void deleteRoleById(Long id);
 
-    public boolean isRoleInList(Role roleToCheck, List<Role> roleList);
+    void addRole(Role role);
+
 }
+
