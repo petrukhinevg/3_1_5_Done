@@ -1,12 +1,11 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.kata.spring.boot_security.demo.entity.User;
-import ru.kata.spring.boot_security.demo.service.UserService;
+import ru.kata.spring.boot_security.demo.services.UserService;
 
 import java.security.Principal;
 import java.util.Optional;
@@ -20,9 +19,11 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping(path = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/api/auth")
     public ResponseEntity<Optional<User>> getAuthUser(@CurrentSecurityContext(expression = "authentication") Principal principal) {
         Optional<User> user = userService.findByUsername(principal.getName());
         return ResponseEntity.ok(user);
     }
+
+
 }

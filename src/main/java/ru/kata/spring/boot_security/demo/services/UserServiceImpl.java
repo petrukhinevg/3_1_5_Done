@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements ru.kata.spring.boot_security.demo.service.UserService, UserDetailsService {
+public class UserServiceImpl implements ru.kata.spring.boot_security.demo.services.UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 

@@ -1,24 +1,24 @@
-package ru.kata.spring.boot_security.demo.init;
-
-
-import org.springframework.stereotype.Component;
-import ru.kata.spring.boot_security.demo.entity.Role;
-import ru.kata.spring.boot_security.demo.entity.User;
-import ru.kata.spring.boot_security.demo.services.RoleServiceImpl;
-import ru.kata.spring.boot_security.demo.services.UserServiceImpl;
-
-import javax.annotation.PostConstruct;
-import java.util.Set;
-
-@Component
-public class DbInit {
-    private final UserServiceImpl userService;
-    private final RoleServiceImpl roleService;
-
-    public DbInit(UserServiceImpl userService, RoleServiceImpl roleService) {
-        this.userService = userService;
-        this.roleService = roleService;
-    }
+//package ru.kata.spring.boot_security.demo.init;
+//
+//
+//import org.springframework.stereotype.Component;
+//import ru.kata.spring.boot_security.demo.entity.Role;
+//import ru.kata.spring.boot_security.demo.entity.User;
+//import ru.kata.spring.boot_security.demo.services.RoleServiceImpl;
+//import ru.kata.spring.boot_security.demo.services.UserServiceImpl;
+//
+//import javax.annotation.PostConstruct;
+//import java.util.Set;
+//
+//@Component
+//public class DbInit {
+//    private final UserServiceImpl userService;
+//    private final RoleServiceImpl roleService;
+//
+//    public DbInit(UserServiceImpl userService, RoleServiceImpl roleService) {
+//        this.userService = userService;
+//        this.roleService = roleService;
+//    }
 //    @PostConstruct
 //    private void postConstruct() {
 //        Role roleAdmin = new Role((long)1,"ADMIN");
@@ -31,4 +31,4 @@ public class DbInit {
 //        userService.addUser(user);
 //        userService.addUser(admin);
 //    }
-}
+//}
